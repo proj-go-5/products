@@ -4,7 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"products/internal/app"
+
+	"github.com/proj-go-5/products/internal/app"
 )
 
 func main() {
