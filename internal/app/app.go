@@ -8,6 +8,7 @@ type App struct {
 
 func (a *App) GetRouter() *http.ServeMux {
 	router := http.NewServeMux()
+
 	router.HandleFunc("GET /products", a.handleGetProducts)
 	// handle other functions
 
