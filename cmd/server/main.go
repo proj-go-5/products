@@ -3,9 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/http"
-
 	"github.com/proj-go-5/products/internal/app"
+	"net/http"
 )
 
 func main() {
