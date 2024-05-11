@@ -1,9 +1,20 @@
 package app
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/proj-go-5/products/internal/storage"
+)
 
 type App struct {
-	// Storage
+	storage *storage.MySQLStorage
+}
+
+func NewApp(s *storage.MySQLStorage) *App {
+	app := &App{
+		storage: s,
+	}
+	return app
 }
 
 func (a *App) GetRouter() *http.ServeMux {

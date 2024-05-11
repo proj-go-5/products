@@ -1,16 +1,47 @@
 package storage
 
 import (
-	_ "github.com/go-sql-driver/mysql"
+	"fmt"
+
+	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/golang-migrate/migrate/v4"
+
+	"github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
 )
 
-func DBConnect() *sqlx.DB {
-	db, err := sqlx.Open("mysql", "root:root@tcp(localhost:13306)/products")
+func DBConnect(dbConf mysqlDriver.Config) *sqlx.DB {
+	db, err := sqlx.Open("mysql", dbConf.FormatDSN())
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
 
 	return db
+}
+
+func get(db *sqlx.DB, dest interface{}, tableName string, filter string) error {
+	whereClause := ""
+	if filter != "" {
+		whereClause = fmt.Sprintf(" WHERE %s", filter)
+	}
+	err := db.Select(dest, fmt.Sprintf("select * from %s%s", tableName, whereClause))
+	return err
+}
+
+func setUpToDateDB(db *sqlx.DB) error {
+	driver, err := mysql.WithInstance(db.DB, &mysql.Config{})
+	if err != nil {
+		return fmt.Errorf("cannot obtain driver: %s", err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://././migrations",
+		"products", driver)
+	if err != nil {
+		return fmt.Errorf("cannot migrate: %s", err)
+	}
+	return m.Migrate(3)
 }

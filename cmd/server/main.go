@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/proj-go-5/products/internal/app"
+	"github.com/proj-go-5/products/internal/storage"
 )
 
 var (
@@ -23,7 +24,10 @@ func main() {
 		fmt.Printf("Running the server on port %s\n", port)
 	}
 
-	app := app.App{}
+	mysql := storage.NewStorage()
+	defer mysql.Close()
+
+	app := app.NewApp(mysql)
 	router := app.GetRouter()
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", port), router)
