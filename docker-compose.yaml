@@ -17,13 +17,13 @@ services:
       - PORT=${APP_PORT:?port is not set}
   db:
     image: mysql:8.3
-    container_name: db
+    container_name: products_db
     restart: unless-stopped
     tty: true
     networks:
       - mynet
     ports:
-      - "13306:$MYSQL_TCP_PORT"
+      - "$MYSQL_TCP_PORT_EXPOSE:$MYSQL_TCP_PORT"
     env_file:
       - path: ./.env
         required: true
