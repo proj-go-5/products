@@ -16,5 +16,5 @@ func (a *App) GetRouter() *http.ServeMux {
 }
 
 func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
-
+	w.Write([]byte("Hello!"))
 }

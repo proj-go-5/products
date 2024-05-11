@@ -1,23 +1,32 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"github.com/proj-go-5/products/internal/app"
 	"net/http"
+	"os"
+
+	"github.com/proj-go-5/products/internal/app"
+)
+
+var (
+	Version = ""
 )
 
 func main() {
-	portFlag := flag.Int("port", 8000, "A port to run the service on")
-	flag.Parse()
+	fmt.Printf("App version : %s\n", Version)
+
+	port, ok := os.LookupEnv("PORT")
+	if !ok {
+		fmt.Println("Port not found")
+		port = "8000"
+	} else {
+		fmt.Printf("Running the server on port %s\n", port)
+	}
 
 	app := app.App{}
 	router := app.GetRouter()
 
-	if portFlag != nil {
-		fmt.Println("PORT!", *portFlag)
-	}
-	err := http.ListenAndServe(fmt.Sprintf(":%d", *portFlag), router)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", port), router)
 	if err != nil {
 		fmt.Print("Server run error", err)
 	}

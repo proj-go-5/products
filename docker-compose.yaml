@@ -1,15 +1,33 @@
-version: '3'
 services:
-
+  server:
+    container_name: products
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_VERSION: v1.0.0
+    depends_on:
+      - db
+    hostname: products
+    networks:
+      - mynet
+    ports:
+      - "$APP_PORT:$APP_PORT"
+    environment:
+      - PORT=${APP_PORT:?port is not set}
   db:
     image: mysql:8.3
-    container_name: db
+    container_name: products_db
     restart: unless-stopped
     tty: true
+    networks:
+      - mynet
     ports:
-      - "13306:3306"
-    environment:
-      MYSQL_DATABASE: products
-      MYSQL_ROOT_PASSWORD: root
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      - "$MYSQL_TCP_PORT_EXPOSE:$MYSQL_TCP_PORT"
+    env_file:
+      - path: ./.env
+        required: true
+
+networks:
+  mynet:
+    driver: bridge
