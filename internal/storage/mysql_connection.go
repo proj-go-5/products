@@ -6,6 +6,7 @@ import (
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/proj-go-5/products/internal/dto"
 
 	"github.com/golang-migrate/migrate/v4"
 
@@ -54,6 +55,16 @@ func add(db *sqlx.DB, values map[string]interface{}, tableName string) error {
 	)
 
 	_, err := db.NamedExec(request, values)
+	return err
+}
+
+func updateProduct(db *sqlx.DB, product *dto.ProductRequest) error {
+	_, err := db.NamedExec(`UPDATE Product SET title=:title, price=:price, description=:description, update_date=CURRENT_TIMESTAMP(), images=:image WHERE id=:id`, product)
+	return err
+}
+
+func delete(db *sqlx.DB, tableName string, id int32) error {
+	_, err := db.Exec(fmt.Sprintf(`DELETE FROM %s WHERE id=%d`, tableName, id))
 	return err
 }
 
