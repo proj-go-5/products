@@ -79,6 +79,14 @@ func (ms *MySQLStorage) Get(dest interface{}, tableName string, filter string) e
 	return err
 }
 
+func (ms *MySQLStorage) Add(values map[string]interface{}, tableName string) error {
+	if ms.db == nil {
+		return fmt.Errorf("DB is empty")
+	}
+	err := add(ms.db, values, tableName)
+	return err
+}
+
 func (ms *MySQLStorage) Close() error {
 	if ms.db == nil {
 		return fmt.Errorf("DB is empty")
