@@ -27,12 +27,25 @@ func NewStorage() *MySQLStorage {
 		dbHost = "localhost"
 	}
 
+	dbUser, ok := os.LookupEnv("DB_USER")
+	if !ok {
+		fmt.Println("env var DB_USER is not found")
+		dbHost = "root"
+	}
+	dbPass := os.Getenv("DB_PASSWORD")
+
+	dbName, ok := os.LookupEnv("DB_NAME")
+	if !ok {
+		fmt.Printf("env var DB_NAME is not found")
+		dbName = "products"
+	}
+
 	dbConf := mysqlDriver.Config{
-		User:                 "root",
-		Passwd:               "",
+		User:                 dbUser,
+		Passwd:               dbPass,
 		Net:                  "tcp",
 		Addr:                 fmt.Sprintf("%s:%s", dbHost, dbPort),
-		DBName:               "products",
+		DBName:               dbName,
 		AllowNativePasswords: true,
 	}
 

@@ -43,5 +43,5 @@ func setUpToDateDB(db *sqlx.DB) error {
 	if err != nil {
 		return fmt.Errorf("cannot migrate: %s", err)
 	}
-	return m.Migrate(3)
+	return m.Up()
 }
