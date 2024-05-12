@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"strings"
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -28,6 +29,31 @@ func get(db *sqlx.DB, dest interface{}, tableName string, filter string) error {
 		whereClause = fmt.Sprintf(" WHERE %s", filter)
 	}
 	err := db.Select(dest, fmt.Sprintf("select * from %s%s", tableName, whereClause))
+	return err
+}
+
+func add(db *sqlx.DB, values map[string]interface{}, tableName string) error {
+	// Constructing a sql request
+	//like this : INSERT INTO Product (first_name,last_name,email) VALUES (:first,:last,:email)
+	//values := map[string]interface{}{
+	//		"first": "Bin",
+	//		"last":  "Smuth",
+	//		"email": "bensmith@allblacks.nz",
+	//	}
+	sqlFields := make([]string, 0, len(values))
+	sqlValues := make([]string, 0, len(values))
+	for k := range values {
+		sqlFields = append(sqlFields, k)
+		sqlValues = append(sqlValues, fmt.Sprintf(":%v", k))
+	}
+
+	request := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
+		tableName,
+		strings.Join(sqlFields, ","),
+		strings.Join(sqlValues, ","),
+	)
+
+	_, err := db.NamedExec(request, values)
 	return err
 }
 
