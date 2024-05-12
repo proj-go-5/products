@@ -7,19 +7,26 @@ services:
       args:
         APP_VERSION: v1.0.0
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     hostname: products
     networks:
       - mynet
+    env_file:
+      - path: ./.env
+        required: true
     ports:
       - "$APP_PORT:$APP_PORT"
     environment:
       - PORT=${APP_PORT:?port is not set}
+      - DB_HOST=localhost
   db:
     image: mysql:8.3
     container_name: products_db
     restart: unless-stopped
     tty: true
+    volumes: 
+      - ./init:/docker-entrypoint-initdb.d
     networks:
       - mynet
     ports:
@@ -27,6 +34,12 @@ services:
     env_file:
       - path: ./.env
         required: true
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 2s
+      timeout: 20s
+      retries: 10
+
 
 networks:
   mynet:
