@@ -6,6 +6,7 @@ import (
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/proj-go-5/products/internal/dto"
 )
 
 type MySQLStorage struct {
@@ -84,6 +85,22 @@ func (ms *MySQLStorage) Add(values map[string]interface{}, tableName string) err
 		return fmt.Errorf("DB is empty")
 	}
 	err := add(ms.db, values, tableName)
+	return err
+}
+
+func (ms *MySQLStorage) UpdateProduct(product *dto.ProductRequest) error {
+	if ms.db == nil {
+		return fmt.Errorf("DB is empty")
+	}
+	err := updateProduct(ms.db, product)
+	return err
+}
+
+func (ms *MySQLStorage) Delete(string tableName, id int32) error {
+	if ms.db == nil {
+		return fmt.Errorf("DB is empty")
+	}
+	err := delete(ms.db, "Product", id)
 	return err
 }
 
