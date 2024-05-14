@@ -72,6 +72,7 @@ storage.Get(products, "Product", "id=3")
 // receive all products with filter
 storage.Get(products, "Product", "title LIKE '%tro%'")
 */
+
 func (ms *MySQLStorage) Get(dest interface{}, tableName string, filter string) error {
 	if ms.db == nil {
 		return fmt.Errorf("DB is empty")
@@ -96,7 +97,7 @@ func (ms *MySQLStorage) UpdateProduct(product *dto.ProductRequest) error {
 	return err
 }
 
-func (ms *MySQLStorage) Delete(string tableName, id int32) error {
+func (ms *MySQLStorage) Delete(tableName string, id int32) error {
 	if ms.db == nil {
 		return fmt.Errorf("DB is empty")
 	}

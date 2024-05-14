@@ -30,6 +30,7 @@ func (a *App) GetRouter() *http.ServeMux {
 	router.HandleFunc("POST /products", a.handleAddProduct)
 	router.HandleFunc("PUT /products", a.handleChangeProduct)
 	router.HandleFunc("DELETE /products/{id}", a.handleDeleteProduct)
+	router.HandleFunc("GET /products/{id}", a.handleGetProduct)
 
 	router.HandleFunc("GET /products/{id}/reviews", a.handleGetReview)
 	router.HandleFunc("POST /products/{id}/reviews", a.handleAddReview)
@@ -39,7 +40,58 @@ func (a *App) GetRouter() *http.ServeMux {
 }
 
 func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello!"))
+	filter := r.URL.Query().Get("filter")
+	sortBy := r.URL.Query().Get("sort_by")
+	pageNumInt, _ := strconv.Atoi(r.URL.Query().Get("page_num"))
+	pageSizeInt, _ := strconv.Atoi(r.URL.Query().Get("page_size"))
+
+	if pageNumInt == 0 {
+		pageNumInt = 1
+	}
+	if pageSizeInt == 0 {
+		pageSizeInt = 100
+	}
+
+	offset := (pageNumInt - 1) * pageSizeInt
+
+	filterSQL := ""
+	if filter != "" {
+		filterSQL = fmt.Sprintf("WHERE title LIKE '%s' OR description LIKE '%s'", filter, filter)
+	}
+
+	sortBySQL := "ORDER BY name"
+	if sortBy != "" {
+		sortBySQL = fmt.Sprintf("ORDER BY %s", sortBy)
+	}
+
+	SQLRequest := fmt.Sprintf("%s %s LIMIT %d OFFSET %d", filterSQL, sortBySQL, pageSizeInt, offset)
+
+	var products []dto.ProductRequest
+	err := a.storage.Get(&products, "Product", SQLRequest)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	sendOk(w)
+}
+
+func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
+	productIdStr := r.PathValue("id")
+	productId, err := strconv.ParseInt(productIdStr, 10, 32)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, fmt.Sprintf("Cannot parse id: %v", err))
+		return
+	}
+
+	var products []dto.ProductRequest
+	err = a.storage.Get(&products, "Product", fmt.Sprintf("id = %d", productId))
+	if err != nil {
+		sendError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	sendOk(w)
 }
 
 func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {
@@ -109,6 +161,21 @@ func (a *App) handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) handleGetReview(w http.ResponseWriter, r *http.Request) {
+	productIdStr := r.PathValue("id")
+	productId, err := strconv.ParseInt(productIdStr, 10, 32)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, fmt.Sprintf("Cannot parse id: %v", err))
+		return
+	}
+
+	var reviews []dto.ProductRequest
+	err = a.storage.Get(&reviews, "Review", fmt.Sprintf("product_id = %d", productId))
+	if err != nil {
+		sendError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	sendOk(w)
 }
 
 func (a *App) handleAddReview(w http.ResponseWriter, r *http.Request) {
