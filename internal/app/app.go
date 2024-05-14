@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/proj-go-5/products/internal/dto"
@@ -42,6 +43,7 @@ func (a *App) GetRouter() *http.ServeMux {
 func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 	filter := r.URL.Query().Get("filter")
 	sortBy := r.URL.Query().Get("sort_by")
+	order := r.URL.Query().Get("order")
 	pageNumInt, _ := strconv.Atoi(r.URL.Query().Get("page_num"))
 	pageSizeInt, _ := strconv.Atoi(r.URL.Query().Get("page_size"))
 
@@ -64,7 +66,12 @@ func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 		sortBySQL = fmt.Sprintf("ORDER BY %s", sortBy)
 	}
 
-	SQLRequest := fmt.Sprintf("%s %s LIMIT %d OFFSET %d", filterSQL, sortBySQL, pageSizeInt, offset)
+	orderSQL := "ASC"
+	if order != "" {
+		orderSQL = strings.ToUpper(order)
+	}
+
+	SQLRequest := fmt.Sprintf("%s %s %s LIMIT %d OFFSET %d", filterSQL, sortBySQL, orderSQL, pageSizeInt, offset)
 
 	var products []dto.ProductRequest
 	err := a.storage.Get(&products, "Product", SQLRequest)
