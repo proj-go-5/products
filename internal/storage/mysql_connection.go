@@ -24,12 +24,12 @@ func DBConnect(dbConf mysqlDriver.Config) *sqlx.DB {
 	return db
 }
 
-func get(db *sqlx.DB, dest interface{}, tableName string, filter string) error {
-	whereClause := ""
+func get(db *sqlx.DB, dest interface{}, tableName string, filter string, args ...interface{}) error {
+	query := "SELECT * FROM " + tableName
 	if filter != "" {
-		whereClause = fmt.Sprintf(" WHERE %s", filter)
+		query += " WHERE " + filter
 	}
-	err := db.Select(dest, fmt.Sprintf("select * from %s%s", tableName, whereClause))
+	err := db.Select(dest, query, args...)
 	return err
 }
 
@@ -81,4 +81,43 @@ func setUpToDateDB(db *sqlx.DB) error {
 		return fmt.Errorf("cannot migrate: %s", err)
 	}
 	return m.Up()
+}
+
+func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, pageNum int, pageSize int, ids string) ([]dto.ProductRequest, error) {
+	var products []dto.ProductRequest
+	queryArgs := []interface{}{}
+
+	searchParam := ""
+	if ids != "" {
+		idsSlice := strings.Split(ids, ",")
+		for _, id := range idsSlice {
+			queryArgs = append(queryArgs, id)
+		}
+		searchParam = fmt.Sprintf("WHERE id IN (?%s)", strings.Repeat(",?", len(idsSlice)-1))
+
+	} else if filter != "" {
+		searchParam = "WHERE title LIKE ? OR description LIKE ?"
+		queryArgs = append(queryArgs, "%"+filter+"%", "%"+filter+"%")
+	}
+
+	sortBySQL := "ORDER BY name"
+	if sortBy != "" {
+		sortBySQL = "ORDER BY " + sortBy
+	}
+
+	orderSQL := "ASC"
+	if order == "desc" {
+		orderSQL = "DESC"
+	}
+
+	offset := (pageNum - 1) * pageSize
+	SQLRequest := fmt.Sprintf("SELECT * FROM Product %s %s %s LIMIT ? OFFSET ?", searchParam, sortBySQL, orderSQL)
+	queryArgs = append(queryArgs, pageSize, offset)
+
+	err := ms.db.Select(&products, SQLRequest, queryArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
 }

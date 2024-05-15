@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/proj-go-5/products/internal/dto"
@@ -44,41 +43,27 @@ func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 	filter := r.URL.Query().Get("filter")
 	sortBy := r.URL.Query().Get("sort_by")
 	order := r.URL.Query().Get("order")
-	pageNumInt, _ := strconv.Atoi(r.URL.Query().Get("page_num"))
-	pageSizeInt, _ := strconv.Atoi(r.URL.Query().Get("page_size"))
+	pageNum := r.URL.Query().Get("page_num")
+	pageSize := r.URL.Query().Get("page_size")
+	ids := r.URL.Query().Get("ids")
 
-	if pageNumInt == 0 {
+	pageNumInt, err := strconv.Atoi(pageNum)
+	if err != nil || pageNumInt < 1 {
 		pageNumInt = 1
 	}
-	if pageSizeInt == 0 {
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil || pageSizeInt < 1 {
 		pageSizeInt = 100
 	}
 
-	offset := (pageNumInt - 1) * pageSizeInt
-
-	filterSQL := ""
-	if filter != "" {
-		filterSQL = fmt.Sprintf("WHERE title LIKE '%s' OR description LIKE '%s'", filter, filter)
-	}
-
-	sortBySQL := "ORDER BY name"
-	if sortBy != "" {
-		sortBySQL = fmt.Sprintf("ORDER BY %s", sortBy)
-	}
-
-	orderSQL := "ASC"
-	if order != "" {
-		orderSQL = strings.ToUpper(order)
-	}
-
-	SQLRequest := fmt.Sprintf("%s %s %s LIMIT %d OFFSET %d", filterSQL, sortBySQL, orderSQL, pageSizeInt, offset)
-
-	var products []dto.ProductRequest
-	err := a.storage.Get(&products, "Product", SQLRequest)
+	products, err := a.storage.GetProducts(filter, sortBy, order, pageNumInt, pageSizeInt, ids)
 	if err != nil {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	// In the future transfer products to the API
+	fmt.Println(products)
 
 	sendOk(w)
 }
