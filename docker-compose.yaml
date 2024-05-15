@@ -1,7 +1,7 @@
 services:
   server:
     container_name: products
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
       args:
@@ -19,13 +19,13 @@ services:
       - "$APP_PORT:$APP_PORT"
     environment:
       - PORT=${APP_PORT:?port is not set}
-      - DB_HOST=localhost
+      - DB_HOST=db
   db:
     image: mysql:8.3
     container_name: products_db
     restart: unless-stopped
     tty: true
-    volumes: 
+    volumes:
       - ./init:/docker-entrypoint-initdb.d
     networks:
       - mynet
