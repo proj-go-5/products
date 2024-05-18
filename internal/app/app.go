@@ -63,9 +63,13 @@ func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// In the future transfer products to the API
-	fmt.Println(products)
+	//fmt.Println(products)
 
-	sendOk(w)
+	type resp struct {
+		Page []dto.ProductRequest `json:"page"`
+	}
+
+	json.NewEncoder(w).Encode(resp{Page: products})
 }
 
 func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
@@ -82,8 +86,6 @@ func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	sendOk(w)
 }
 
 func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {

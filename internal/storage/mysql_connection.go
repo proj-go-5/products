@@ -102,10 +102,10 @@ func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, 
 		queryArgs = append(queryArgs, "%"+filter+"%", "%"+filter+"%")
 	}
 
-	sortBySQL := "ORDER BY name"
-	if sortBy != "" {
-		sortBySQL = "ORDER BY " + sortBy
-	}
+	sortBySQL := "ORDER BY id"
+	//if sortBy != "" {
+	//	sortBySQL = "ORDER BY " + sortBy
+	//}
 
 	orderSQL := "ASC"
 	if order == "desc" {
