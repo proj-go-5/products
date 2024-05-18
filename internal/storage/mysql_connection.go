@@ -17,6 +17,10 @@ import (
 )
 
 func DBConnect(dbConf mysqlDriver.Config) *sqlx.DB {
+	dbConf.Params = map[string]string{
+		"parseTime": "true",
+	}
+
 	db, err := sqlx.Open("mysql", dbConf.FormatDSN())
 	if err != nil {
 		panic(err.Error())

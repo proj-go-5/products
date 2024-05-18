@@ -76,6 +76,7 @@ func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var products []dto.ProductRequest
+
 	err = a.storage.Get(&products, "Product", fmt.Sprintf("id = %d", productId))
 	if err != nil {
 		sendError(w, http.StatusBadRequest, err.Error())
