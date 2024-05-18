@@ -69,6 +69,7 @@ func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 		Page []dto.ProductRequest `json:"page"`
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp{Page: products})
 }
 

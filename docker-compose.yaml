@@ -11,8 +11,7 @@ services:
         condition: service_healthy
     hostname: products
     env_file:
-      - path: ./.env
-        required: true
+      - ./.env
     ports:
       - "$PORT:$PORT"
 
@@ -26,8 +25,8 @@ services:
     ports:
       - "$MYSQL_TCP_PORT_EXPOSE:$DB_PORT"
     env_file:
-      - path: ./.env
-        required: true
+      - ./.env
+
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u$DB_USER", "-p$DB_PASSWORD"]
       interval: 20s
