@@ -62,12 +62,10 @@ func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	sendRequest(w, products)
+	sendResponse(w, products)
 }
 
 func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("product 1 is active")
 	productIdStr := r.PathValue("id")
 	productId, err := strconv.ParseInt(productIdStr, 10, 32)
 	if err != nil {
@@ -83,7 +81,7 @@ func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sendRequest(w, products)
+	sendResponse(w, products)
 }
 
 func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {
@@ -233,7 +231,7 @@ func sendOk(w http.ResponseWriter) {
 	w.Write([]byte(`{"status":"ok"}`))
 }
 
-func sendRequest(w http.ResponseWriter, data any) {
+func sendResponse(w http.ResponseWriter, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(data)
 	if err != nil {

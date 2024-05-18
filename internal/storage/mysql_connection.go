@@ -17,10 +17,6 @@ import (
 )
 
 func DBConnect(dbConf mysqlDriver.Config) *sqlx.DB {
-	dbConf.Params = map[string]string{
-		"parseTime": "true",
-	}
-
 	db, err := sqlx.Open("mysql", dbConf.FormatDSN())
 	if err != nil {
 		panic(err.Error())
@@ -89,8 +85,10 @@ func setUpToDateDB(db *sqlx.DB) error {
 	return m.Up()
 }
 
-func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, pageNum int, pageSize int, ids string) ([]dto.ProductRequest, error) {
+func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, pageNum int, pageSize int, ids string) (dto.ProductPageRequest, error) {
 	var products []dto.ProductRequest
+	var pageProducts dto.ProductPageRequest
+	//var pageProducts dto.ProductPageResponse
 	queryArgs := []interface{}{}
 
 	searchParam := ""
@@ -122,8 +120,9 @@ func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, 
 
 	err := ms.db.Select(&products, SQLRequest, queryArgs...)
 	if err != nil {
-		return nil, err
+		return pageProducts, err
 	}
+	pageProducts.Page = products
 
-	return products, nil
+	return pageProducts, nil
 }

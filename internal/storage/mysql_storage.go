@@ -48,6 +48,7 @@ func NewStorage() *MySQLStorage {
 		Addr:                 fmt.Sprintf("%s:%s", dbHost, dbPort),
 		DBName:               dbName,
 		AllowNativePasswords: true,
+		ParseTime:            true,
 	}
 
 	s.db = DBConnect(dbConf)
