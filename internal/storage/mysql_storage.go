@@ -16,9 +16,9 @@ type MySQLStorage struct {
 func NewStorage() *MySQLStorage {
 	s := &MySQLStorage{}
 
-	dbPort, ok := os.LookupEnv("MYSQL_TCP_PORT_EXPOSE")
+	dbPort, ok := os.LookupEnv("DB_PORT")
 	if !ok {
-		fmt.Println("env var MYSQL_TCP_PORT_EXPOSE is not found")
+		fmt.Println("env var DB_PORT is not found")
 		dbPort = "3306"
 	}
 

@@ -171,9 +171,56 @@ func (a *App) handleGetReview(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) handleAddReview(w http.ResponseWriter, r *http.Request) {
+	productIdStr := r.PathValue("id")
+	productId, err := strconv.ParseInt(productIdStr, 10, 32)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, fmt.Sprintf("Cannot parse id: %v", err))
+		return
+	}
+
+	bodyBytes, err := utils.ReadBody(r)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	pr := dto.ReviewRequest{}
+	err = json.Unmarshal(bodyBytes, &pr)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, fmt.Sprintf("Body unmarshalling error: %v", err))
+		return
+	}
+
+	err = a.storage.Add(
+		map[string]interface{}{
+			"product_id": productId,
+			"user_id":    pr.UserId,
+			"score":      pr.Score,
+			"text":       pr.Text,
+			"pros":       pr.Pros,
+			"cons":       pr.Cons,
+		},
+		"Review",
+	)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, fmt.Sprintf("Insert error: %v", err))
+		return
+	}
+	sendOk(w)
 }
 
 func (a *App) handleDeleteReview(w http.ResponseWriter, r *http.Request) {
+	reviewIdStr := r.PathValue("review_id")
+	productId, err := strconv.ParseInt(reviewIdStr, 10, 32)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, fmt.Sprintf("Cannot parse review_id: %v", err))
+		return
+	}
+	err = a.storage.Delete("Review", int32(productId))
+	if err != nil {
+		sendError(w, http.StatusInternalServerError, fmt.Sprintf("Delete error: %v", err))
+		return
+	}
+	sendOk(w)
 }
 
 func sendError(w http.ResponseWriter, status int, text string) {

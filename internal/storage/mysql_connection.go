@@ -75,7 +75,7 @@ func setUpToDateDB(db *sqlx.DB) error {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://././migrations",
+		"file:///migrations",
 		"products", driver)
 	if err != nil {
 		return fmt.Errorf("cannot migrate: %s", err)
