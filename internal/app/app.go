@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -62,13 +63,11 @@ func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// In the future transfer products to the API
-	fmt.Println(products)
-
-	sendOk(w)
+	sendRequest(w, products)
 }
 
 func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("product 1 is active")
 	productIdStr := r.PathValue("id")
 	productId, err := strconv.ParseInt(productIdStr, 10, 32)
 	if err != nil {
@@ -83,7 +82,7 @@ func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sendOk(w)
+	sendRequest(w, products)
 }
 
 func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {
@@ -231,4 +230,12 @@ func sendError(w http.ResponseWriter, status int, text string) {
 func sendOk(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
+}
+
+func sendRequest(w http.ResponseWriter, data any) {
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		log.Printf("writing response: %s", err)
+	}
 }
