@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	mysqlDriver "github.com/go-sql-driver/mysql"
@@ -74,8 +75,9 @@ func setUpToDateDB(db *sqlx.DB) error {
 		return fmt.Errorf("cannot obtain driver: %s", err)
 	}
 
+	path := os.Getenv("MIGRATIONS_PATH")
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://././migrations",
+		path,
 		"products", driver)
 	if err != nil {
 		return fmt.Errorf("cannot migrate: %s", err)

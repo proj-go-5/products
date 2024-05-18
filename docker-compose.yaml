@@ -10,16 +10,12 @@ services:
       db:
         condition: service_healthy
     hostname: products
-    networks:
-      - mynet
     env_file:
       - path: ./.env
         required: true
     ports:
-      - "$APP_PORT:$APP_PORT"
-    environment:
-      - PORT=${APP_PORT:?port is not set}
-      - DB_HOST=db
+      - "$PORT:$PORT"
+
   db:
     image: mysql:8.3
     container_name: products_db
@@ -27,20 +23,13 @@ services:
     tty: true
     volumes:
       - ./init:/docker-entrypoint-initdb.d
-    networks:
-      - mynet
     ports:
-      - "$MYSQL_TCP_PORT_EXPOSE:$MYSQL_TCP_PORT"
+      - "$MYSQL_TCP_PORT_EXPOSE:$DB_PORT"
     env_file:
       - path: ./.env
         required: true
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      interval: 2s
-      timeout: 20s
-      retries: 10
-
-
-networks:
-  mynet:
-    driver: bridge
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u$DB_USER", "-p$DB_PASSWORD"]
+      interval: 20s
+      timeout: 5s
+      retries: 20

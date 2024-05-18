@@ -17,6 +17,7 @@ FROM busybox
 RUN mkdir app
 
 COPY --from=builder /app/bin/* /app
+COPY migrations /migrations
 
 #copy static files if needed
 
