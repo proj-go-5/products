@@ -87,6 +87,13 @@ func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	if len(products) == 1 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(products[0])
+	}
+
+	w.WriteHeader(http.StatusNotFound)
 }
 
 func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {
