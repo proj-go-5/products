@@ -73,15 +73,16 @@ func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var products []dto.ProductRequest
+	var products []dto.Product
 
 	err = a.storage.Get(&products, "Product", fmt.Sprintf("id = %d", productId))
 	if err != nil {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	sendResponse(w, products)
+	for _, product := range products {
+		sendResponse(w, product)
+	}
 }
 
 func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +91,7 @@ func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	pr := dto.ProductRequest{}
+	pr := dto.Product{}
 	err = json.Unmarshal(bodyBytes, &pr)
 	if err != nil {
 		sendError(w, http.StatusBadRequest, fmt.Sprintf("Body unmarshalling error: %v", err))
@@ -121,7 +122,7 @@ func (a *App) handleChangeProduct(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	pr := dto.ProductRequest{}
+	pr := dto.Product{}
 	err = json.Unmarshal(bodyBytes, &pr)
 	if err != nil {
 		sendError(w, http.StatusBadRequest, fmt.Sprintf("Body unmarshalling error: %v", err))
@@ -158,14 +159,15 @@ func (a *App) handleGetReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reviews []dto.ProductRequest
+	var reviews []dto.Review
 	err = a.storage.Get(&reviews, "Review", fmt.Sprintf("product_id = %d", productId))
 	if err != nil {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	sendOk(w)
+	for _, review := range reviews {
+		sendResponse(w, review)
+	}
 }
 
 func (a *App) handleAddReview(w http.ResponseWriter, r *http.Request) {
@@ -181,7 +183,7 @@ func (a *App) handleAddReview(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	pr := dto.ReviewRequest{}
+	pr := dto.Review{}
 	err = json.Unmarshal(bodyBytes, &pr)
 	if err != nil {
 		sendError(w, http.StatusBadRequest, fmt.Sprintf("Body unmarshalling error: %v", err))

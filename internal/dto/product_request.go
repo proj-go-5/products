@@ -2,7 +2,7 @@ package dto
 
 import "time"
 
-type ProductRequest struct {
+type Product struct {
 	Id          int32     `db:"id" json:"id"`
 	Title       string    `db:"title" json:"title"`
 	Price       int32     `db:"price" json:"price"`
@@ -11,6 +11,6 @@ type ProductRequest struct {
 	Image       string    `db:"images" json:"image_url"`
 }
 
-type ProductPageRequest struct {
-	Page []ProductRequest `json:"page"`
+type ProductPage struct {
+	Page []Product `json:"page"`
 }

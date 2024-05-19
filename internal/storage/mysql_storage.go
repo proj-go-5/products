@@ -90,7 +90,7 @@ func (ms *MySQLStorage) Add(values map[string]interface{}, tableName string) err
 	return err
 }
 
-func (ms *MySQLStorage) UpdateProduct(product *dto.ProductRequest) error {
+func (ms *MySQLStorage) UpdateProduct(product *dto.Product) error {
 	if ms.db == nil {
 		return fmt.Errorf("DB is empty")
 	}
