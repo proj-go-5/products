@@ -159,15 +159,14 @@ func (a *App) handleGetReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reviews []dto.Review
+	var reviews = []dto.Review{}
 	err = a.storage.Get(&reviews, "Review", fmt.Sprintf("product_id = %d", productId))
 	if err != nil {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	for _, review := range reviews {
-		sendResponse(w, review)
-	}
+
+	sendResponse(w, reviews)
 }
 
 func (a *App) handleAddReview(w http.ResponseWriter, r *http.Request) {
