@@ -59,7 +59,7 @@ func add(db *sqlx.DB, values map[string]interface{}, tableName string) error {
 	return err
 }
 
-func updateProduct(db *sqlx.DB, product *dto.ProductRequest) error {
+func updateProduct(db *sqlx.DB, product *dto.Product) error {
 	_, err := db.NamedExec(`UPDATE Product SET title=:title, price=:price, description=:description, update_date=CURRENT_TIMESTAMP(), images=:image WHERE id=:id`, product)
 	return err
 }
@@ -85,8 +85,9 @@ func setUpToDateDB(db *sqlx.DB) error {
 	return m.Up()
 }
 
-func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, pageNum int, pageSize int, ids string) ([]dto.ProductRequest, error) {
-	var products []dto.ProductRequest
+func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, pageNum int, pageSize int, ids string) (dto.ProductPage, error) {
+	var products []dto.Product
+	var pageProducts dto.ProductPage
 	queryArgs := []interface{}{}
 
 	searchParam := ""
@@ -102,9 +103,10 @@ func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, 
 		queryArgs = append(queryArgs, "%"+filter+"%", "%"+filter+"%")
 	}
 
-	sortBySQL := "ORDER BY name"
+	sortBySQL := "ORDER BY title"
 	if sortBy != "" {
-		sortBySQL = "ORDER BY " + sortBy
+		sortBySQL = "ORDER BY ?"
+		queryArgs = append(queryArgs, sortBy)
 	}
 
 	orderSQL := "ASC"
@@ -118,8 +120,9 @@ func (ms *MySQLStorage) GetProducts(filter string, sortBy string, order string, 
 
 	err := ms.db.Select(&products, SQLRequest, queryArgs...)
 	if err != nil {
-		return nil, err
+		return pageProducts, err
 	}
+	pageProducts.Page = products
 
-	return products, nil
+	return pageProducts, nil
 }

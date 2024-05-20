@@ -48,6 +48,7 @@ func NewStorage() *MySQLStorage {
 		Addr:                 fmt.Sprintf("%s:%s", dbHost, dbPort),
 		DBName:               dbName,
 		AllowNativePasswords: true,
+		ParseTime:            true,
 	}
 
 	s.db = DBConnect(dbConf)
@@ -89,7 +90,7 @@ func (ms *MySQLStorage) Add(values map[string]interface{}, tableName string) err
 	return err
 }
 
-func (ms *MySQLStorage) UpdateProduct(product *dto.ProductRequest) error {
+func (ms *MySQLStorage) UpdateProduct(product *dto.Product) error {
 	if ms.db == nil {
 		return fmt.Errorf("DB is empty")
 	}

@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -61,11 +62,7 @@ func (a *App) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	// In the future transfer products to the API
-	fmt.Println(products)
-
-	sendOk(w)
+	sendResponse(w, products)
 }
 
 func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
@@ -76,14 +73,16 @@ func (a *App) handleGetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var products []dto.ProductRequest
+	var products []dto.Product
+
 	err = a.storage.Get(&products, "Product", fmt.Sprintf("id = %d", productId))
 	if err != nil {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	sendOk(w)
+	for _, product := range products {
+		sendResponse(w, product)
+	}
 }
 
 func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +91,7 @@ func (a *App) handleAddProduct(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	pr := dto.ProductRequest{}
+	pr := dto.Product{}
 	err = json.Unmarshal(bodyBytes, &pr)
 	if err != nil {
 		sendError(w, http.StatusBadRequest, fmt.Sprintf("Body unmarshalling error: %v", err))
@@ -123,7 +122,7 @@ func (a *App) handleChangeProduct(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	pr := dto.ProductRequest{}
+	pr := dto.Product{}
 	err = json.Unmarshal(bodyBytes, &pr)
 	if err != nil {
 		sendError(w, http.StatusBadRequest, fmt.Sprintf("Body unmarshalling error: %v", err))
@@ -160,14 +159,14 @@ func (a *App) handleGetReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reviews []dto.ProductRequest
+	var reviews = []dto.Review{}
 	err = a.storage.Get(&reviews, "Review", fmt.Sprintf("product_id = %d", productId))
 	if err != nil {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	sendOk(w)
+	sendResponse(w, reviews)
 }
 
 func (a *App) handleAddReview(w http.ResponseWriter, r *http.Request) {
@@ -183,7 +182,7 @@ func (a *App) handleAddReview(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	pr := dto.ReviewRequest{}
+	pr := dto.Review{}
 	err = json.Unmarshal(bodyBytes, &pr)
 	if err != nil {
 		sendError(w, http.StatusBadRequest, fmt.Sprintf("Body unmarshalling error: %v", err))
@@ -231,4 +230,12 @@ func sendError(w http.ResponseWriter, status int, text string) {
 func sendOk(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
+}
+
+func sendResponse(w http.ResponseWriter, data any) {
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		log.Printf("writing response: %s", err)
+	}
 }
